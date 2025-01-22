@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192x192.png"> <!-- Placeholder for apple-touch-icon -->
+    <title>PWA Sample App</title>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+    <style>
+        /* Moved styles for Install Button */
+        #install-button {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Moved styles for iOS Instructions */
+        #ios-instructions {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px;
+            background-color: #f7f7f7;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 300px;
+        }
+
+        /* Moved styles for iOS Close Button */
+        #ios-close-btn {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background: #333;
+            color: #fff;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to the PWA Sample App</h1>
+    </header>
+    <main>
+        <h2>Home Page</h2>
+        <p>This is a sample Progressive Web App demonstrating the install button and offline capabilities.</p>
+    </main>
+    <footer>
+        <p>&copy; 2023 PWA Sample App</p>
+    </footer>
+
+    <!-- Install Button -->
+    <button id="install-button">
+        Install App
+    </button>
+
+    <!-- iOS Instructions -->
+    <div id="ios-instructions">
+        <p>To install this app on your iPhone or iPad:</p>
+        <ol>
+            <li>Tap the <strong>Share</strong> button in Safari.</li>
+            <li>Scroll down and select <strong>Add to Home Screen</strong>.</li>
+            <li>Follow the on-screen instructions.</li>
+        </ol>
+        <button id="ios-close-btn">
+            Got it
+        </button>
+    </div>
+    <script>
+        let deferredPrompt;
+
+        function isIOS() {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        if (isIOS()) {
+            const iosInstructions = document.getElementById('ios-instructions');
+            iosInstructions.style.display = 'block';
+
+            document.getElementById('ios-close-btn').addEventListener('click', () => {
+                iosInstructions.style.display = 'none';
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-button').style.display = 'block';
+        });
+
+        document.getElementById('install-button').addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+            }
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA installed');
+            document.getElementById('install-button').style.display = 'none';
+        });
+    </script>
+</body>
+
+</html>
